@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'main',
 ]
 
 MIDDLEWARE = [
@@ -76,7 +77,7 @@ WSGI_APPLICATION = 'booktime.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': 'mydatabase',
     }
 }
 
@@ -121,10 +122,12 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 #to make bootstrap work.
-STATIC_URL = '/main/static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = 'C:/Users/conec/Desktop/Django/Pratical Django 2 and Channel 2/BookTime/main/static/'
 STATICFILES_DIRS = [
-    os.path.join("main", "static"),
+    os.path.join(BASE_DIR, "static"),
 ]
+
 
 if not DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
