@@ -3,25 +3,22 @@ from django.utils.html import format_html
 
 from . import models
 
-admin.site.register(models.Product)
-admin.site.register(models.ProductTag)
-admin.site.register(models.ProductImage)
-
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'in_stock', 'price')
     list_filter = ('active', 'in_stock', 'date_update')
     list_editable = ('in_stock', )
     search_fields = ('name', )
+    autocomplete_fields = ('tags',)
     prepopulated_fields = {"slug": ("name", )}
     
 admin.site.register(models.Product, ProductAdmin)
 
 class ProductTagAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug'),
+    list_display = ('name', 'slug')
     list_filter = ('active',)
     search_fields = ('name',)
     prepopulated_fields = {"slug": ("name",)}
-    autocomplete_fields = ('products',)
+
 
 admin.site.register(models.ProductTag, ProductTagAdmin)
 
@@ -38,6 +35,6 @@ class ProductImageAdmin(admin.ModelAdmin):
         return "-"
     thumbnail_tag.short_description = "Thumbnail"
     def product_name(self, obj):
-        return obj.procut.name
+        return obj.product.name
 
 admin.site.register(models.ProductImage, ProductImageAdmin)
