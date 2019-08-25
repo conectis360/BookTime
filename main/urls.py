@@ -3,10 +3,26 @@
 from django.urls import path
 from . import views
 from main import views
+from django.views.generic.detail import DetailView
+from main import models
 
 
 urlpatterns = [
-    path('',
+    
+    path(
+        "product/<slug:slug>/",
+        DetailView.as_view(model=models.Product),
+        name="product",
+    ),
+    
+    path(
+        "products/<slug:tag>/",
+        views.ProductListView.as_view(),
+        name="products",
+        ),
+
+    path(
+        '',
         views.HomePageView.as_view(),
         name='home'
         ),
