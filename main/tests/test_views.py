@@ -1,6 +1,11 @@
 from django.test import TestCase
+from django.urls import reverse
+from . import forms
+from unittest.mock import patch
+from django.contrib import auth
 from decimal import Decimal
 from main import models
+
 
 class TestPage(TestCase):
     def test_home_page_works(self):
@@ -8,7 +13,39 @@ class TestPage(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
         self.assertContains(response, 'BookTime')
-        
+
+    def test_user_signup_page_loads_correctly(self):
+        response = self.client.get(reverse("signup"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "signup.html")
+        self.assertContains(response, "BookTime")
+        self.assertIsInstance(
+            response.context["form"], forms.UserCreationForm
+        )
+
+        def test_user_signup_page_submission_works(self):
+            post_data = {
+                "email": "user@domain.com",
+                "password1": "abcabcabc",
+                "password2": "abcabcabc",
+            }
+            with patch.object(
+                forms.UserCreationForm, "send_mail"
+            ) as mock_send:
+                response = self.client.post(
+                    reverse("signup"), post_data
+                )
+            self.assertEqual(response.status_code, 302)
+            self.assertTrue(
+                models.User.objects.filter(
+                    email="user@domain.com"
+                ).exists()
+            )
+            self.assertTrue(
+                auth.get_user(self.client).is_authenticated
+            )
+            mock_send.assert_called_once()
+
     def test_products_page_returns_active(self):
         models.Product.objects.create(
             name="The cathedral and the bazaar",
@@ -33,7 +70,7 @@ class TestPage(TestCase):
             list(response.context["object_list"]),
             list(product_list),
         )
-        
+
         def test_products_page_filters_by_tags_and_active(self):
             cb = models.Product.objects.create(
                 name="The cathedral and the bazaar",
@@ -60,10 +97,9 @@ class TestPage(TestCase):
                 list(response.context["object_list"]),
                 list(product_list),
             )
-        
+
     def test_about_page_works(self):
         response = self.client.get("about_us")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'about_us.html')
         self.assertContains(response, 'BookTime')
-        

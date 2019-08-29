@@ -1,7 +1,43 @@
 from django import forms
+from django.contrib.auth import authenticate
 from django.core.mail import send_mail
+from django.contrib.auth.forms import (
+    UserCreationForm as DjangoUserCreationForm
+)
+from django.contrib.auth.forms import UsernameField
+from . import models
+
 import logging
 logger = logging.getLogger(__name__)
+
+
+class AuthenticationForm(forms.Form):
+    email = forms.EmailField()
+    password = forms.CharField(
+        strip=False, widget=forms.PasswordInput
+    )
+
+
+class UserCreationForm(DjangoUserCreationForm):
+    class Meta(DjangoUserCreationForm):
+        model = models.User
+        fields = ("email",)
+        field_classes = {"email": UsernameField}
+        
+    def send_mail(self):
+        logger.info
+        (
+            "Sending signup email for email=%s",
+            self.cleaned_data["email"],
+        )
+        message = "Welcome{} ".format(self.cleaned_data["email"])
+        send_mail(
+            "Welcome to booktime",
+            message,
+            "site@booktime.domain",
+            [self.cleaned_data["email"]],
+            fail_silently=True,
+        )
 
 class ContactForm(forms.Form):
     name = forms.CharField(label='Your Name', max_length=100)

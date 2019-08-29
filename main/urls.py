@@ -8,6 +8,11 @@ from main import models
 
 
 urlpatterns = [
+    path(
+        'signup/', 
+        views.SignupView.as_view(), 
+        name="signup"
+        ),
     
     path(
         "product/<slug:slug>/",
