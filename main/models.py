@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 from django.contrib.auth.models import (
     AbstractUser,
     BaseUserManager,
@@ -123,3 +124,17 @@ class Address(models.Model):
                 self.country,
             ]
         )
+        
+class Basket(models.Model):
+    OPEN = 10
+    SUBMITTED = 20
+    STATUSES = ((OPEN, "Open"), (SUBMITTED, "Submitted"))
+    
+    user = models.ForeignKey (
+        User, on_delete = models.CASCADE, blank=True, null=True
+    )
+    
+    status = models.IntegerField(choises=STATUSES, default=OPEN)
+    
+    def is_empety(self):
+        return self.basketline_set.all().count() == 0
