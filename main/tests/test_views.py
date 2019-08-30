@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from . import forms
+from main import forms
 from unittest.mock import patch
 from django.contrib import auth
 from decimal import Decimal
@@ -23,7 +23,7 @@ class TestPage(TestCase):
             response.context["form"], forms.UserCreationForm
         )
 
-        def test_user_signup_page_submission_works(self):
+    def test_user_signup_page_submission_works(self):
             post_data = {
                 "email": "user@domain.com",
                 "password1": "abcabcabc",
@@ -71,35 +71,88 @@ class TestPage(TestCase):
             list(product_list),
         )
 
-        def test_products_page_filters_by_tags_and_active(self):
-            cb = models.Product.objects.create(
+    def test_products_page_filters_by_tags_and_active(self):
+                cb = models.Product.objects.create(
                 name="The cathedral and the bazaar",
                 slug="cathedral-bazaar",
                 price=Decimal("10.00"),
             )
-            cb.tags.create(name="Open source", slug="opensource")
-            models.Product.objects.create(
-                name="Microsoft Windows guide",
-                slug="microsoft-windows-guide",
-                price=Decimal("12.00"),
-            )
-            response = self.client.get(
-                reverse("products", kwargs={"tag": "opensource"})
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertContains(response, "BookTime")
-            product_list = (
-                models.Product.objects.active()
-                .filter(tags__slug="opensource")
-                .order_by("name")
-            )
-            self.assertEqual(
-                list(response.context["object_list"]),
-                list(product_list),
-            )
+                cb.tags.create(name="Open source", slug="opensource")
+                models.Product.objects.create(
+                    name="Microsoft Windows guide",
+                    slug="microsoft-windows-guide",
+                    price=Decimal("12.00"),
+                )
+                response = self.client.get(
+                    reverse("products", kwargs={"tag": "opensource"})
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, "BookTime")
+                product_list = (
+                    models.Product.objects.active()
+                    .filter(tags__slug="opensource")
+                    .order_by("name")
+                )
+                self.assertEqual(
+                    list(response.context["object_list"]),
+                    list(product_list),
+                )
 
     def test_about_page_works(self):
         response = self.client.get("about_us")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'about_us.html')
         self.assertContains(response, 'BookTime')
+
+
+    def test_address_list_page_returns_only_owned(self):
+
+        user1 = models.User.objects.create_user(
+            "user1", "pw432joij"
+        )
+        user2 = models.User.objects.create_user(
+            "user2", "pw432joij"
+        )
+        models.Address.objects.create(
+            user=user1,
+            name="john kimball",
+            address1="flat 2",
+            address2="12 Stralz avenue",
+            city="London",
+            country="uk",
+        )
+        models.Address.objects.create(
+            user=user2,
+            name="marc kimball",
+            address1="123 Deacon road",
+            city="London",
+            country="uk",
+        )
+        self.client.force_login(user2)
+        response = self.client.get(reverse("address_list"))
+        self.assertEqual(response.status_code, 200)
+        address_list = models.Address.objects.filter(user=user2)
+        self.assertEqual(
+            list(response.context["object_list"]),
+            list(address_list),
+        )
+    
+    def test_address_create_stores_user(self):
+        user1 = models.User.objects.create_user(
+            "user1", "pw432joij"
+        )
+        post_data = {
+            "name": "john kercher",
+            "address1": "1 av st",
+            "address2": "",
+            "zip_code": "MA12GS",
+            "city": "Manchester",
+            "country": "uk",
+        }
+        self.client.force_login(user1)
+        self.client.post(
+            reverse("address_create"), post_data
+        )
+        self.assertTrue(
+            models.Address.objects.filter(user=user1).exists()
+        )

@@ -20,8 +20,52 @@ from main import forms
 logger = logging.getLogger(__name__)
 
 class AddressListView(LoginRequiredMixin, ListView):
+    model = models.Address
     
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.request.user)
 
+class AddresCreateView(LoginRequiredMixin, CreateView):
+    model = models.Address
+    fields = [
+        "name",
+        "addres1",
+        "addres2",
+        "zip_code",
+        "city",
+        "country",
+    ]
+    success_url = reverse_lazy("address_list")
+    
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+        return super().form_valid(form)
+    
+class AddressUpdateView(LoginRequiredMixin, UpdateView):
+    model = models.Address
+    fields = [
+        "name",
+        "addres1",
+        "addres2",
+        "zip_code",
+        "city",
+        "country",
+    ]
+    success_url = reverse_lazy("address_list")
+    
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.request.user)
+    
+class AddressDeleteView(LoginRequiredMixin, DeleteView):
+    model = models.Address
+    success_url = reverse_lazy("address_list")
+    
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.request.user)
+    
+    
 class SignupView(FormView):
     template_name = "signup.html"
     form_class = forms.UserCreationForm
