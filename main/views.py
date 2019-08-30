@@ -2,14 +2,25 @@ import logging
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.shortcuts import render
-from main import forms
-from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.edit import FormView, CreateView, UpdateView, DeleteView
+from django.views.generic.edit import (
+    FormView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+)
 from main import models
+from main import forms
 
 logger = logging.getLogger(__name__)
+
+class AddressListView(LoginRequiredMixin, ListView):
+    
 
 class SignupView(FormView):
     template_name = "signup.html"
