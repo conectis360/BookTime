@@ -11,6 +11,7 @@ from main import models
 
 
 urlpatterns = [
+
     path(
         "address/",
         views.AddressListView.as_view(),
@@ -80,5 +81,9 @@ urlpatterns = [
         name='about_us'
         ),
     
-    
+    path(
+        "add_to_basket/",
+        views.add_to_basket,
+        name="add_to_basket",
+    ),
 ]

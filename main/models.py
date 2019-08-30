@@ -5,6 +5,8 @@ from django.contrib.auth.models import (
     BaseUserManager,
 )
 
+#python manage.py migrate --run-syncdb
+
 
 
 class ProductTagManager(models.Manager):
@@ -134,7 +136,19 @@ class Basket(models.Model):
         User, on_delete = models.CASCADE, blank=True, null=True
     )
     
-    status = models.IntegerField(choises=STATUSES, default=OPEN)
+    status = models.IntegerField(choices=STATUSES, default=OPEN)
     
     def is_empety(self):
         return self.basketline_set.all().count() == 0
+    
+    def count(self):
+        return sum(i.quantity for i in self.basketline_set.all())
+    
+class BasketLine(models.Model):
+    basket = models.ForeignKey(Basket, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE
+    )
+    quantity = models.PositiveIntegerField(
+        default=1, validators=[MinValueValidator(1)]
+    )
