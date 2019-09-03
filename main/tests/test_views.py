@@ -9,20 +9,17 @@ from main import models
 
 class TestPage(TestCase):
     def test_home_page_works(self):
-        response = self.client.get("home")
+        response = self.client.get(reverse("/home/"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'home.html')
-        self.assertContains(response, 'BookTime')
-
-    def test_user_signup_page_loads_correctly(self):
-        response = self.client.get(reverse("signup"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "signup.html")
+        self.assertTemplateUsed(response, "home.html")
         self.assertContains(response, "BookTime")
-        self.assertIsInstance(
-            response.context["form"], forms.UserCreationForm
-        )
-
+        
+    def test_about_page_works(self):
+        response = self.client.get(reverse("about_us"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "about_us.html")
+        self.assertContains(response, "BookTime")
+        
     def test_user_signup_page_submission_works(self):
             post_data = {
                 "email": "user@domain.com",
@@ -63,6 +60,7 @@ class TestPage(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "BookTime")
+
         product_list = models.Product.objects.active().order_by(
             "name"
         )
@@ -72,38 +70,41 @@ class TestPage(TestCase):
         )
 
     def test_products_page_filters_by_tags_and_active(self):
-                cb = models.Product.objects.create(
-                name="The cathedral and the bazaar",
-                slug="cathedral-bazaar",
-                price=Decimal("10.00"),
-            )
-                cb.tags.create(name="Open source", slug="opensource")
-                models.Product.objects.create(
-                    name="Microsoft Windows guide",
-                    slug="microsoft-windows-guide",
-                    price=Decimal("12.00"),
-                )
-                response = self.client.get(
-                    reverse("products", kwargs={"tag": "opensource"})
-                )
-                self.assertEqual(response.status_code, 200)
-                self.assertContains(response, "BookTime")
-                product_list = (
-                    models.Product.objects.active()
-                    .filter(tags__slug="opensource")
-                    .order_by("name")
-                )
-                self.assertEqual(
-                    list(response.context["object_list"]),
-                    list(product_list),
-                )
-
-    def test_about_page_works(self):
-        response = self.client.get("about_us")
+        cb = models.Product.objects.create(
+            name="The cathedral and the bazaar",
+            slug="cathedral-bazaar",
+            price=Decimal("10.00"),
+        )
+        cb.tags.create(name="Open source", slug="opensource")
+        models.Product.objects.create(
+            name="Microsoft Windows guide",
+            slug="microsoft-windows-guide",
+            price=Decimal("12.00"),
+        )
+        response = self.client.get(
+            reverse("products", kwargs={"tag": "opensource"})
+        )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'about_us.html')
-        self.assertContains(response, 'BookTime')
+        self.assertContains(response, "BookTime")
 
+        product_list = (
+            models.Product.objects.active()
+            .filter(tags__slug="opensource")
+            .order_by("name")
+        )
+        self.assertEqual(
+            list(response.context["object_list"]),
+            list(product_list),
+        )
+
+    def test_user_signup_page_loads_correctly(self):
+        response = self.client.get(reverse("signup"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "signup.html")
+        self.assertContains(response, "BookTime")
+        self.assertIsInstance(
+            response.context["form"], forms.UserCreationForm
+        )
 
     def test_address_list_page_returns_only_owned(self):
 
@@ -192,7 +193,7 @@ class TestPage(TestCase):
         )
         self.assertEquals(
             models.BasketLine.objects.filter(
-                basket user=user1
+                basket__user=user1
             ).count(),
             2,
         )

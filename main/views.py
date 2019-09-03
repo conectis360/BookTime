@@ -1,7 +1,7 @@
 import logging
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404
@@ -98,24 +98,6 @@ class SignupView(FormView):
         
 
 
-class ProductListView(ListView):
-    template_name = 'main/product_list.html'
-    paginate_by = 4
-    
-    def get_queryset(self):
-        tag = self.kwargs['tag']
-        self.tag = None
-        if tag!="all":
-            self.tag = get_object_or_404(
-                models.ProductTag, slug=tag
-            )
-        if self.tag:
-            products = models.Product.objects.active().filter(
-                tags = self.tag
-            )
-        else:
-            products = models.Product.objects.active()
-        return products.order_by("name")
 
 class ContactUsView(FormView):
     template_name = 'contact_form.html'
@@ -132,6 +114,26 @@ class HomePageView(TemplateView):
 
 class AboutPageView(TemplateView):
     template_name = 'about_us.html'
+
+class ProductListView(ListView):
+    template_name = "main/product_list.html"
+    paginate_by = 4
+
+def get_queryset(self):
+        tag = self.kwargs['tag']
+        self.tag = None
+        if tag != "all":
+            self.tag = get_object_or_404(
+                models.ProductTag, slug=tag
+            )
+        if self.tag:
+            products = models.Product.objects.active().filter(
+                tags=self.tag
+            )
+        else:
+            products = models.Product.objects.active()
+        return products.order_by("name")
+
 
 def add_to_basket(request):
     product = get_object_or_404(
@@ -155,4 +157,23 @@ def add_to_basket(request):
     return HttpResponseRedirect(
         reverse("product", args=(product.slug,))
     )
-        
+
+def manage_basket(request):
+    if not request.basket:
+        return render(request, "basket.html", {"formset": None})
+    
+    if request.method == "POST":
+        formset = forms.BasketLineFormSet(
+            request.POST, instance=request.basket
+        )
+        if formset.is_valid():
+            formset.save()
+    else:
+        formset = forms.BasketLineFormSet(
+            instance=request.basket
+        )
+    
+    if request.basket.is_empty():
+        return render(request, "basket.html", {"formset": None})
+    
+    return render(request, "basket.html", {"formset": formset})

@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import inlineformset_factory
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.contrib.auth.forms import (
@@ -10,6 +11,12 @@ from . import models
 import logging
 logger = logging.getLogger(__name__)
 
+BasketLineFormSet = inlineformset_factory(
+    models.Basket,
+    models.BasketLine,
+    fields=("quantity",),
+    extra=0
+)
 
 class AuthenticationForm(forms.Form):
     email = forms.EmailField()
@@ -84,3 +91,4 @@ class ContactForm(forms.Form):
             ["customerservice@booktime.domain"],
             fail_silently=False,
         )
+        

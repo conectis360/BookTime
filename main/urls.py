@@ -11,7 +11,12 @@ from main import models
 
 
 urlpatterns = [
-
+    path(
+        "basket/",
+        views.manage_basket,
+        name="basket"
+    ),
+    
     path(
         "address/",
         views.AddressListView.as_view(),
@@ -61,7 +66,7 @@ urlpatterns = [
         "products/<slug:tag>/",
         views.ProductListView.as_view(),
         name="products",
-        ),
+    ),
 
     path(
         '',
