@@ -27,7 +27,7 @@ class AddressListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return self.model.objects.filter(user=self.request.user)
 
-class AddresCreateView(LoginRequiredMixin, CreateView):
+class AddressCreateView(LoginRequiredMixin, CreateView):
     model = models.Address
     fields = [
         "name",

@@ -29,7 +29,7 @@ class TestForm(TestCase):
         self.assertTrue(form.is_valid())
     
         with self.assertLogs('main.forms', level='INFO') as cm:
-            form.send_email()
+            form.send_mail()
         
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Site message')

@@ -11,12 +11,12 @@ from . import models
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'in_stock', 'price')
-    list_filter = ('active', 'in_stock', 'date_update')
-    list_editable = ('in_stock', )
-    search_fields = ('name', )
-    autocomplete_fields = ('tags',)
-    prepopulated_fields = {"slug": ("name", )}
+    list_display = ("name", "slug", "in_stock", "price")
+    list_filter = ("active", "in_stock", "date_updated")
+    list_editable = ("in_stock",)
+    search_fields = ("name",)
+    prepopulated_fields = {"slug": ("name",)}
+    autocomplete_fields = ("tags",)
 
 
 admin.site.register(models.Product, ProductAdmin)
