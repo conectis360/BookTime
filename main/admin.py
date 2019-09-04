@@ -10,6 +10,7 @@ from django.utils.html import format_html
 from . import models
 
 
+
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "in_stock", "price")
     list_filter = ("active", "in_stock", "date_updated")
@@ -95,3 +96,18 @@ class UserAdmin(DjangoUserAdmin):
     )
     search_fields = ("email", "first_name", "last_name")
     ordering = ("email",)
+    
+class BasketLineInline(admin.TabularInline):
+    model = models.BasketLine
+    raw_id_fields = ("product",)
+    
+@admin.register(models.Basket)
+class BasketAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "status", "count")
+    list_editable = ("status",)
+    list_filter = ("status",)
+    inlines = (BasketLineInline,)
+
+class OrderLineInLine(admin.TabularInline):
+    model = models.OrderLine
+    raw_id_fields = ("product",)
