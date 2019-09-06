@@ -124,4 +124,16 @@ urlpatterns = [
         views.add_to_basket,
         name="add_to_basket",
     ),
+    
+    path(
+        "order-dashboard/",
+        views.OrderView.as_view(),
+        name="order_dashboard",
+    ),
+
+    if settings.DEBUG:
+        import debug_toolbar
+        urlpatterns = {
+            path('__debug__/', include(debug_toolbar.urls)),
+        } + urlpatterns
 ]
