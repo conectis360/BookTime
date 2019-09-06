@@ -9,6 +9,8 @@ verify_ssl = true
 django = "==2.0"
 psycopg2 = "*"
 pillow = "*"
+selenium = "*"
+django-webpack-loader = "*"
 
 [requires]
 python_version = "3.6"
