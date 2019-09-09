@@ -1,17 +1,27 @@
 #Django
+from rest_framework import routers
 from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import path, include
 from django.views.generic.detail import DetailView
 from django.views.generic import TemplateView
 
 #Project
 from . import views
+from main import endpoints
 from main import forms
 from main import views
 from main import models
 
+router = routers.DefaultRouter()
+router.register(r'orderlines', endpoints.PaidOrderLineViewSet)
+router.register(r'orders', endpoints.PaidOrderViewSet)
+
 
 urlpatterns = [
+    path(
+        'api/', 
+        include(router.urls)
+        ),    
     path(
         "order/done/",
         TemplateView.as_view(template_name="order_done.html"),
@@ -130,7 +140,6 @@ urlpatterns = [
         views.OrderView.as_view(),
         name="order_dashboard",
     ),
-
     if settings.DEBUG:
         import debug_toolbar
         urlpatterns = {
