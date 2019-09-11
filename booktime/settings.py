@@ -145,10 +145,9 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 #to make bootstrap work.
-STATIC_URL = '/static/'
-STATIC_ROOT = 'C:/Users/conec/Desktop/Django/Pratical Django 2 and Channel 2/BookTime/main/static/'
+STATIC_URL = 'main/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, "main/static"),
 ]
 
 

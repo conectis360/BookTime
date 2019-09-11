@@ -108,7 +108,7 @@ class BasketAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     inlines = (BasketLineInline,)
 
-class OrderLineInLine(admin.TabularInline):
+class OrderLineInline(admin.TabularInline):
     model = models.OrderLine
     raw_id_fields = ("product",)
     
@@ -117,7 +117,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "status")
     list_editable = ("status",)
     list_filter = ("status", "shipping_country", "date_added")
-    inlines = (OrderLineInLine)
+    inlines = (OrderLineInline,)
     fieldsets = (
         (None, {"fields": ("user", "status")}),
         (
@@ -125,7 +125,7 @@ class OrderAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "billing_name",
-                    "billing_address1"
+                    "billing_address1",
                     "billing_address2",
                     "billing_zip_code",
                     "billing_city",
@@ -135,7 +135,8 @@ class OrderAdmin(admin.ModelAdmin):
         ),
         (
             "Shipping info",
-            {   "fields": (
+            {
+                "fields": (
                     "shipping_name",
                     "shipping_address1",
                     "shipping_address2",
