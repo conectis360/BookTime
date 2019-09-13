@@ -1,5 +1,14 @@
 from django.db import models
 import logging
+from django.contrib.admin import ModelAdmin
+from django.contrib.auth.admin import (
+UserAdmin as DjangoUserAdmin
+)
+from django.utils.html import format_html
+from django.db.models.functions import TruncDay
+from django.db.models import Avg, Count, Min, Sum
+from django.urls import path
+from django.template.response import TemplateResponse
 from django.core.validators import MinValueValidator
 from django.contrib.auth.models import (
     AbstractUser,
@@ -10,8 +19,61 @@ logger = logging.getLogger(__name__)
 
 #python manage.py migrate --run-syncdb
 
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "in_stock", "price")
+    list_filter = ("active", "in_stock", "date_updated")
+    list_editable = ("in_stock",)
+    search_fields = ("name",)
+    prepopulated_fields = {"slug": ("name",)}
+    autocomplete_fields = ("tags",)
 
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return self.readonly_fields
+        return list(self.readonly_fields) + ["slug", "name"]
 
+    def get_prepopulated_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return self.prepopulated_fields
+        else:
+            return {}
+        
+        
+class DispatchersProductAdmin(ProductAdmin):
+    readonly_fields = ("description", "price", "tags", "active")
+    prepopulated_fields = {}
+    autocomplete_fields = ()
+    
+class ProductTagAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
+    list_filter = ("active",)
+    search_fields = ("name",)
+    prepopulated_fields = {"slug": ("name",)}
+    
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return self.readonly_fields
+        return list(self.readonly_fields) + ["slug", "name"]
+    
+    def get_prepopulated_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return self.prepopulated_fields
+        else:
+            return {}
+        
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ("thumbnail_tag", "product_name")
+    readonly_fields = ("thumbnail",)
+    search_fields = ("product__name",)
+    
+    def thumbnail_tag(self, obj):
+        if obj.thumbnail:
+            return format_html(
+                '<img src="%s"' % obj.thumbnail.url
+            )
+        return "-"
+    
+    
 class ProductTagManager(models.Manager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
@@ -95,7 +157,6 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password, **extra_fields)
 
-
 class User(AbstractUser):
     username = None
     email = models.EmailField("email address", unique=True)
@@ -104,6 +165,22 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+    @property
+    def is_employee(self):
+        return self.is_active and (
+            self.is_superuser
+            or self.is_staff
+            and self.groups.filter(name="Employees").exists()
+        )
+
+    @property
+    def is_dispatcher(self):
+        return self.is_active and (
+            self.is_superuser
+            or self.is_staff
+            and self.groups.filter(name="Dispatchers").exists()
+        )
 
 class Address(models.Model):
     SUPPORTED_COUNTRIES = (

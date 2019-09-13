@@ -145,7 +145,7 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 #to make bootstrap work.
-STATIC_URL = 'main/static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "main/static"),
 ]
